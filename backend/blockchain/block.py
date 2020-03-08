@@ -36,6 +36,19 @@ class Block:
             f'nonce: {self.nonce})'
         )
 
+    def to_json(self):
+        """
+        Returns serializable representation of Block object
+        """
+        return self.__dict__
+
+    @staticmethod
+    def from_json(block_json):
+        """
+        Converts json data of block to a Block object
+        """
+        return Block(**block_json)
+
     @staticmethod
     def mine_block(last_block, data):
         """

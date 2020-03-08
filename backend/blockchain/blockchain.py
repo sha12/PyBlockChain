@@ -13,6 +13,19 @@ class BlockChain:
     def __repr__(self):
         return f"Blockchain: {self.chain}"
 
+    def to_json(self):
+        return [block.to_json() for block in self.chain]
+
+    @staticmethod
+    def from_json(chain_json):
+        """
+        reserialize list of serialized blocks to Blockchain object.
+        """
+        blockchain = BlockChain()
+        blockchain.chain = [Block.from_json(
+            block_json) for block_json in chain_json]
+        return blockchain
+
     @staticmethod
     def is_chain_valid(chain):
         """

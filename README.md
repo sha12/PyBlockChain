@@ -15,3 +15,15 @@ pip install -r requirements.txt
 ```
 python -m pytest backend/tests
 ```
+
+**Run the API**
+
+```
+python -m backend.app
+```
+
+**To run a peer instance**
+
+```
+export PEER=True && python -m backend.app
+```
