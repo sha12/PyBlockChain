@@ -1,5 +1,8 @@
 
 from backend.blockchain.block import Block
+from backend.wallet.transaction import Transaction
+from backend.config import MINIING_REWARD, MINIING_REWARD_INPUT
+from backend.wallet.wallet import Wallet
 
 
 class BlockChain:
@@ -39,6 +42,45 @@ class BlockChain:
             block = chain[i]
             last_block = chain[i-1]
             Block.is_block_valid(last_block, block)
+        BlockChain.is_transaction_chain_valid(chain)
+
+    @staticmethod
+    def is_transaction_chain_valid(chain):
+        """
+        Validate chain with blocks of transactions
+         -- Only one reward per transaction.
+         -- Each transaction must only apprear once in chain.
+        """
+        transaction_ids = []
+        for i in range(len(chain)):
+            block = chain[i]
+            contains_mining_reward = False
+            for transaction_json in block.data:
+                transaction_obj = Transaction.from_json(transaction_json)
+
+                if transaction_obj.id in transaction_ids:
+                    raise Exception(
+                        f"Transaction: {transaction_obj.id} is not unique")
+
+                transaction_ids.append(transaction_obj.id)
+
+                if transaction_obj.input == MINIING_REWARD_INPUT:
+                    if contains_mining_reward:
+                        raise Exception(
+                            f'Duplicate mining reward in block: {block.hash}')
+                    contains_mining_reward = True
+                else:
+                    blockchain_tillnow = BlockChain()
+                    blockchain_tillnow.chain = chain[0:i]
+                    balance_tillnow = Wallet.calculate_balance(
+                        blockchain_tillnow,
+                        transaction_obj.input["address"]
+                    )
+                    if balance_tillnow != transaction_obj.input["amount"]:
+                        raise Exception(
+                            f"Transaction: {transaction_obj.id} has invalid input")
+
+                Transaction.is_transaction_valid(transaction_obj)
 
     def replace_chain(self, chain):
         """

@@ -1,13 +1,19 @@
 import os
 import random
 import requests
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from backend.blockchain.blockchain import BlockChain
 from backend.publish_subscribe import PubSub
+from backend.wallet.wallet import Wallet
+from backend.wallet.transaction import Transaction
+from backend.wallet.transaction_pool import TransactionPool
+
 
 app = Flask(__name__)
 blockchain = BlockChain()
-pubsub = PubSub(blockchain)
+wallet = Wallet(blockchain)
+transaction_pool = TransactionPool()
+pubsub = PubSub(blockchain, transaction_pool)
 
 
 @app.route('/')
@@ -22,11 +28,35 @@ def route_blockchain():
 
 @app.route('/blockchain/mine')
 def route_mine_block():
-    transaction_data = "dummy_transaction_data"
-    blockchain.add_block(data=transaction_data)
+    """
+    Adds a block to local block chain and broadcasts it to all nodes
+    """
+    transaction_data = transaction_pool.transaction_data()
+    transaction_data.append(Transaction.reward(wallet).to_json())
+    blockchain.add_block(transaction_data)
     block = blockchain.chain[-1]
     pubsub.broadcast_block(block)
+    transaction_pool.clear_transactions_added_to_blockchain(blockchain)
     return jsonify(block.to_json())
+
+
+@app.route('/wallet/transaction', methods=['POST'])
+def route_make_transaction():
+    transacation_data = request.get_json()
+    transaction = transaction_pool.find_transaction(wallet.address)
+    if transaction:
+        transaction.update_transaction(
+            wallet, transacation_data["recipient"], transacation_data["amount"])
+    else:
+        transaction = Transaction(
+            wallet, transacation_data['recipient'], transacation_data['amount'])
+    pubsub.broadcast_transaction(transaction)
+    return jsonify(transaction.to_json())
+
+
+@app.route('/wallet/details')
+def route_wallet_details():
+    return jsonify({'address': wallet.address, 'balance': wallet.balance})
 
 
 PORT = 5000
