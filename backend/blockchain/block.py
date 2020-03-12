@@ -7,7 +7,7 @@ GENESIS_DATA = {
     'timestamp': 1,
     'last_hash': 'NA',
     'hash': 'genesis_hash',
-    'data': '',
+    'data': [],
     'difficulty': 3,
     'nonce': 'genesis_nonce'
 }
@@ -103,7 +103,7 @@ class Block:
             block.difficulty,
             block.nonce)
         if block.hash != rebuilded_hash:
-            raise Exception("The hash of the block is invalid")
+            raise Exception(f"The hash of the block: {block.hash} is invalid")
 
 
 if __name__ == "__main__":

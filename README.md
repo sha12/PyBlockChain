@@ -27,3 +27,17 @@ python -m backend.app
 ```
 export PEER=True && python -m backend.app
 ```
+
+**Run frontend**
+
+From frontend directory
+
+```
+npm run start
+```
+
+**For adding dummy data to backend**
+
+```
+export SEED_DATA=True && python -m backend.app
+```

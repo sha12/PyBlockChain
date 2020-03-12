@@ -6,7 +6,7 @@ blockchain = BlockChain()
 
 times = []
 
-for i in range(1000):
+for i in range(100):
     start_time = time.time_ns()
     blockchain.add_block(i)
     time_to_mine = (time.time_ns() - start_time) / SECONDS

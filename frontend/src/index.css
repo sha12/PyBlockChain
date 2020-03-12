@@ -1,0 +1,62 @@
+body {
+  background-color: "white";
+  color: "black";
+  text-align: center;
+  font-size: 20px;
+  font-family: "sans-serif";
+  padding-top: 1.5%;
+  word-wrap: break-word;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.WalletInfo {
+  width: 500px;
+}
+
+.Block {
+  border: 2px solid black;
+  padding: 5%;
+  margin: 2%;
+  width: 60%;
+  margin-left: 20%;
+}
+
+.Transaction {
+  padding: 5%;
+}
+
+.TransactionPool {
+  margin: 10%;
+  margin-top: 5%;
+}
+
+.ConductTransaction {
+  margin: 10%;
+  margin-top: 5%;
+}
+
+.transactionInputs {
+  width: 30%;
+  margin-left: 35%;
+}
+
+.Blockchain {
+  margin: 10%;
+  margin-top: 3%;
+}
+
+a,
+a:hover {
+  color: #e66;
+  text-decoration: underline;
+}
+
+input,
+button {
+  color: black;
+}

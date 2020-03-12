@@ -77,6 +77,6 @@ class PubSub():
 
 if __name__ == "__main__":
     time.sleep(1)
-    blockchain = BlockChain()
-    pubsub = PubSub(blockchain)
-    pubsub.publish(CHANNELS['TEST'], {'pub': 'nub'})
+    # blockchain = BlockChain()
+    # pubsub = PubSub(blockchain)
+    # pubsub.publish(CHANNELS['TEST'], {'pub': 'nub'})

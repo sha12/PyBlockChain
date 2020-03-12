@@ -7,9 +7,18 @@ from backend.publish_subscribe import PubSub
 from backend.wallet.wallet import Wallet
 from backend.wallet.transaction import Transaction
 from backend.wallet.transaction_pool import TransactionPool
+from flask_cors import CORS
+from waitress import serve
+import logging
+from paste.translogger import TransLogger
 
+logger = logging.getLogger('waitress')
+logger.setLevel(logging.INFO)
 
 app = Flask(__name__)
+
+CORS(app, resoources={r'/*': {'origins': 'http://localhost:3000'}})
+
 blockchain = BlockChain()
 wallet = Wallet(blockchain)
 transaction_pool = TransactionPool()
@@ -24,6 +33,18 @@ def route_home():
 @app.route('/blockchain')
 def route_blockchain():
     return jsonify(blockchain.to_json())
+
+
+@app.route('/blockchain/range')
+def route_blockchain_range():
+    start = int(request.args.get('start'))
+    end = int(request.args.get('end'))
+    return jsonify(blockchain.to_json()[::-1][start:end])
+
+
+@app.route('/blockchain/length')
+def route_blockchain_length():
+    return jsonify(len(blockchain.chain))
 
 
 @app.route('/blockchain/mine')
@@ -59,7 +80,30 @@ def route_wallet_details():
     return jsonify({'address': wallet.address, 'balance': wallet.balance})
 
 
+@app.route("/frequent-addresses")
+def route_known_addresses():
+    known_address = set()
+    for block in blockchain.chain:
+        for transaction in block.data:
+            known_address.update(transaction['output'].keys())
+    return jsonify(list(known_address))
+
+
+@app.route('/all-transactions')
+def route_all_transactions():
+    return jsonify(transaction_pool.transaction_data())
+
+
 PORT = 5000
+
+if os.environ.get('SEED_DATA') == 'True':
+    for i in range(10):
+        blockchain.add_block([Transaction(Wallet(), Wallet().address, random.randint(2, 20)).to_json(),
+                              Transaction(Wallet(), Wallet().address, random.randint(2, 20)).to_json()])
+
+    for i in range(5):
+        transaction_pool.add_transaction(Transaction(
+            Wallet(), Wallet().address, random.randint(2, 50)))
 
 if os.environ.get('PEER') == "True":
     result = requests.get('http://localhost:5000/blockchain')
@@ -71,4 +115,7 @@ if os.environ.get('PEER') == "True":
     except Exception as e:
         print(f"\n -- Failed to Synchroniz the local blockchain: {e}")
 
+
 app.run(port=PORT)
+
+#serve(TransLogger(app, setup_console_handler=True))
